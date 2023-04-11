@@ -76,6 +76,9 @@ public class SSSearchData {
         String saveName;
         if (mc.getCurrentServer() != null) {
             saveName = mc.getCurrentServer().ip;
+            if (saveName.endsWith(":25565")) {
+                saveName = saveName.substring(0, saveName.length() - 6);
+            }
         } else if (mc.isConnectedToRealms()) {
             saveName = "Realms";
         } else {
