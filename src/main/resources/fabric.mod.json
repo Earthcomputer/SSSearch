@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "sssearch",
+  "version": "${version}",
+  "name": "SSSearch",
+  "description": "Storage System Search",
+  "authors": [
+    "Earthcomputer"
+  ],
+  "contact": {
+    "repo": "https://github.com/Earthcomputer/SSSearch"
+  },
+  "license": "MIT",
+  "icon": "assets/sssearch/icon.png",
+  "environment": "client",
+  "entrypoints": {
+  },
+  "mixins": [
+    "sssearch.mixins.json"
+  ],
+  "accessWidener": "sssearch.accesswidener",
+  "depends": {
+  }
+}
