@@ -1,15 +1,14 @@
 package net.earthcomputer.sssearch;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.GlobalPos;
@@ -47,7 +46,7 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
         this.displayOperatorCreativeTab = displayOperatorCreativeTab;
         this.imageHeight = 136;
         this.imageWidth = 195;
-        CreativeModeTabs.tryRebuildTabContents(featureFlagSet, hasPermissions(player), player.level.registryAccess());
+        CreativeModeTabs.tryRebuildTabContents(featureFlagSet, hasPermissions(player), player.level().registryAccess());
     }
 
     private boolean hasPermissions(Player player) {
@@ -151,7 +150,7 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
         visibleTags.clear();
         String searchText = searchBox.getValue();
         if (searchText.isEmpty()) {
-            menu.items.addAll(CreativeModeTabs.SEARCH.getDisplayItems());
+            menu.items.addAll(BuiltInRegistries.CREATIVE_MODE_TAB.getOrThrow(CreativeModeTabs.SEARCH).getDisplayItems());
         } else {
             SearchTree<ItemStack> searchTree;
             if (searchText.startsWith("#")) {
@@ -181,9 +180,9 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
     }
 
     @Override
-    protected void renderLabels(PoseStack poseStack, int i, int j) {
+    protected void renderLabels(GuiGraphics guiGraphics, int i, int j) {
         RenderSystem.disableBlend();
-        font.draw(poseStack, Component.translatable("sssearch.name"), 8.0f, 6.0f, 0x404040);
+        guiGraphics.drawString(font, Component.translatable("sssearch.name"), 8, 6, 0x404040);
     }
 
     @Override
@@ -242,38 +241,40 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
     }
 
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
-        renderBackground(poseStack);
-        super.render(poseStack, i, j, f);
+    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+        renderBackground(guiGraphics);
+        super.render(guiGraphics, i, j, f);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        renderTooltip(poseStack, i, j);
+        renderTooltip(guiGraphics, i, j);
     }
 
     @Override
-    protected void renderTooltip(PoseStack poseStack, ItemStack stack, int i, int j) {
-        List<Component> defaultTooltipLines = stack.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
-        ArrayList<Component> tooltipLines = new ArrayList<>(defaultTooltipLines);
-        visibleTags.forEach(tag -> {
-            if (stack.is(tag)) {
-                tooltipLines.add(1, Component.literal("#" + tag.location()).withStyle(ChatFormatting.DARK_PURPLE));
-            }
-        });
-        renderTooltip(poseStack, tooltipLines, stack.getTooltipImage(), i, j);
+    protected List<Component> getTooltipFromContainerItem(ItemStack itemStack) {
+        boolean isHovered = hoveredSlot != null;
+        TooltipFlag.Default defaultFlag = minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
+        TooltipFlag tooltipFlag = isHovered ? defaultFlag.asCreative() : defaultFlag;
+        List<Component> defaultTooltipLines = itemStack.getTooltipLines(minecraft.player, tooltipFlag);
+        List<Component> tooltipLines = new ArrayList<>(defaultTooltipLines);
+        if (isHovered) {
+            visibleTags.forEach(tagKey -> {
+                if (itemStack.is(tagKey)) {
+                    tooltipLines.add(1, Component.literal("#" + tagKey.location()).withStyle(ChatFormatting.DARK_PURPLE));
+                }
+            });
+        }
+
+        return tooltipLines;
     }
 
     @Override
-    protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, SEARCH_TAB_LOCATION);
-        blit(poseStack, leftPos, topPos, 0, 0, imageWidth, imageHeight);
-        searchBox.render(poseStack, i, j, f);
+    protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
+        guiGraphics.blit(SEARCH_TAB_LOCATION, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        searchBox.render(guiGraphics, i, j, f);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         int scrollerLeft = leftPos + 175;
         int scrollerTop = topPos + 18;
         int scrollerBottom = scrollerTop + 112;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, CREATIVE_TABS_LOCATION);
-        blit(poseStack, scrollerLeft, scrollerTop + (int)((float)(scrollerBottom - scrollerTop - 17) * scrollOffs), 232 + (menu.canScroll() ? 0 : 12), 0, 12, 15);
+        guiGraphics.blit(CREATIVE_TABS_LOCATION, scrollerLeft, scrollerTop + (int)((float)(scrollerBottom - scrollerTop - 17) * scrollOffs), 232 + (menu.canScroll() ? 0 : 12), 0, 12, 15);
     }
 
     public static class ItemPickerMenu extends CreativeModeInventoryScreen.ItemPickerMenu {
