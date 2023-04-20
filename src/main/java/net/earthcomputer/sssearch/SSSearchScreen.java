@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
@@ -38,12 +39,19 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
     private float scrollOffs = 0;
     private boolean scrolling;
     private boolean justClicked;
+    private final boolean displayOperatorCreativeTab;
 
-    public SSSearchScreen(Screen parent, Player player) {
+    public SSSearchScreen(Screen parent, FeatureFlagSet featureFlagSet, Player player, boolean displayOperatorCreativeTab) {
         super(new ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
         this.parent = parent;
+        this.displayOperatorCreativeTab = displayOperatorCreativeTab;
         this.imageHeight = 136;
         this.imageWidth = 195;
+        CreativeModeTabs.tryRebuildTabContents(featureFlagSet, hasPermissions(player), player.level.registryAccess());
+    }
+
+    private boolean hasPermissions(Player player) {
+        return player.canUseGameMasterBlocks() && displayOperatorCreativeTab;
     }
 
     @Override

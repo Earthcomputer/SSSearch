@@ -20,7 +20,7 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/EffectRenderingInventoryScreen;init()V", shift = At.Shift.AFTER))
     private void onInit(CallbackInfo ci) {
-        addRenderableWidget(Button.builder(Component.translatable("sssearch.name"), button -> minecraft.setScreen(new SSSearchScreen(this, minecraft.player)))
+        addRenderableWidget(Button.builder(Component.translatable("sssearch.name"), button -> minecraft.setScreen(new SSSearchScreen(this, minecraft.getConnection().enabledFeatures(), minecraft.player, minecraft.options.operatorItemsTab().get())))
             .bounds(width - 102, 2, 100, 20)
             .build());
     }
