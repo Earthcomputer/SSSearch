@@ -59,7 +59,7 @@ public class SSSearch {
                 .collect(Collectors.toSet());
 
         if (itemTypes.size() != 1) {
-            Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("sssearch.multipleItemTypes").withStyle(ChatFormatting.DARK_RED));
+            Minecraft.getInstance().gui.getChat().addMessage(Component.translatable(itemTypes.isEmpty() ? "sssearch.emptyContainer" : "sssearch.multipleItemTypes").withStyle(ChatFormatting.DARK_RED));
             return;
         }
 
