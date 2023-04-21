@@ -64,7 +64,7 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
 
     @Override
     protected void slotClicked(Slot slot, int i, int j, ClickType clickType) {
-        if (justClicked) {
+        if (justClicked && slot.hasItem()) {
             searchBox.moveCursorToEnd();
             searchBox.setHighlightPos(0);
             Item item = slot.getItem().getItem();
