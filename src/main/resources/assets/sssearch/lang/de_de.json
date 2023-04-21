@@ -1,0 +1,11 @@
+{
+  "sssearch.add.success": "Gegenstand %s zum Speicher des Speichersystems hinzugefügt",
+  "sssearch.clear": "Speicher löschen",
+  "sssearch.clear.success": "Speicher des Speichersystems gelöscht",
+  "sssearch.emptyContainer": "Dieses Inventar ist leer",
+  "sssearch.multipleItemTypes": "Dieses Inventar enthält mehrere Gegenstandtypen",
+  "sssearch.name": "Speicher suchen",
+  "sssearch.render.noPositions": "Keine Positionen für %s in das Speichersystem gefunden",
+  "sssearch.render.success": "Positionen werden für %s in das Speichersystem gerendert",
+  "sssearch.setupMode": "Konfigurations-Modus: %s"
+}
