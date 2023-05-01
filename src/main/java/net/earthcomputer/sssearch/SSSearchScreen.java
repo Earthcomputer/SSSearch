@@ -13,13 +13,14 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
@@ -38,12 +39,19 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
     private float scrollOffs = 0;
     private boolean scrolling;
     private boolean justClicked;
+    private final boolean displayOperatorCreativeTab;
 
-    public SSSearchScreen(Screen parent, Player player) {
+    public SSSearchScreen(Screen parent, FeatureFlagSet featureFlagSet, Player player, boolean displayOperatorCreativeTab) {
         super(new ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
         this.parent = parent;
+        this.displayOperatorCreativeTab = displayOperatorCreativeTab;
         this.imageHeight = 136;
         this.imageWidth = 195;
+        CreativeModeTabs.tryRebuildTabContents(featureFlagSet, hasPermissions(player), player.level.registryAccess());
+    }
+
+    private boolean hasPermissions(Player player) {
+        return player.canUseGameMasterBlocks() && displayOperatorCreativeTab;
     }
 
     @Override
@@ -56,7 +64,7 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
 
     @Override
     protected void slotClicked(Slot slot, int i, int j, ClickType clickType) {
-        if (justClicked) {
+        if (justClicked && slot != null && slot.hasItem()) {
             searchBox.moveCursorToEnd();
             searchBox.setHighlightPos(0);
             Item item = slot.getItem().getItem();
@@ -75,28 +83,27 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
     @Override
     protected void init() {
         super.init();
-        minecraft.keyboardHandler.setSendRepeatsToGui(true);
         searchBox = new EditBox(font, leftPos + 82, topPos + 6, 80, font.lineHeight, Component.translatable("itemGroup.search"));
         searchBox.setMaxLength(50);
         searchBox.setBordered(false);
         searchBox.setCanLoseFocus(false);
-        searchBox.setFocus(true);
+        searchBox.setFocused(true);
         searchBox.setTextColor(0xFFFFFF);
         addWidget(searchBox);
         refreshSearchResults();
         menu.scrollTo(0);
 
-        addRenderableWidget(new Button(2, 2, 100, 20, Component.translatable("sssearch.clear").withStyle(ChatFormatting.DARK_RED), button -> {
+        addRenderableWidget(Button.builder(Component.translatable("sssearch.clear").withStyle(ChatFormatting.DARK_RED), button -> {
             SSSearchData searchData = SSSearchData.forCurrentWorld();
             searchData.clear();
             searchData.save();
             minecraft.gui.getChat().addMessage(Component.translatable("sssearch.clear.success"));
-        }));
+        }).bounds(2, 2, 100, 20).build());
 
-        addRenderableWidget(new Button(120, 2, 100, 20, Component.translatable("sssearch.setupMode", SSSearch.setupMode ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), button -> {
+        addRenderableWidget(Button.builder(Component.translatable("sssearch.setupMode", SSSearch.setupMode ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF), button -> {
             SSSearch.setupMode = !SSSearch.setupMode;
             button.setMessage(Component.translatable("sssearch.setupMode", SSSearch.setupMode ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF));
-        }));
+        }).bounds(120, 2, 100, 20).build());
     }
 
     @Override
@@ -107,12 +114,6 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
         if (!searchBox.getValue().isEmpty()) {
             refreshSearchResults();
         }
-    }
-
-    @Override
-    public void removed() {
-        super.removed();
-        minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override
@@ -150,9 +151,7 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
         visibleTags.clear();
         String searchText = searchBox.getValue();
         if (searchText.isEmpty()) {
-            for (Item item : Registry.ITEM) {
-                item.fillItemCategory(CreativeModeTab.TAB_SEARCH, menu.items);
-            }
+            menu.items.addAll(CreativeModeTabs.SEARCH.getDisplayItems());
         } else {
             SearchTree<ItemStack> searchTree;
             if (searchText.startsWith("#")) {
@@ -178,7 +177,7 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
             String pathSearch = searchText.substring(colonIndex + 1).trim();
             locationPredicate = location -> location.getNamespace().contains(namespaceSearch) && location.getPath().contains(pathSearch);
         }
-        Registry.ITEM.getTagNames().filter(key -> locationPredicate.test(key.location())).forEach(visibleTags::add);
+        BuiltInRegistries.ITEM.getTagNames().filter(key -> locationPredicate.test(key.location())).forEach(visibleTags::add);
     }
 
     @Override

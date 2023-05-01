@@ -17,6 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -58,7 +59,7 @@ public class SSSearch {
                 .collect(Collectors.toSet());
 
         if (itemTypes.size() != 1) {
-            Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("sssearch.multipleItemTypes").withStyle(ChatFormatting.DARK_RED));
+            Minecraft.getInstance().gui.getChat().addMessage(Component.translatable(itemTypes.isEmpty() ? "sssearch.emptyContainer" : "sssearch.multipleItemTypes").withStyle(ChatFormatting.DARK_RED));
             return;
         }
 
@@ -103,7 +104,7 @@ public class SSSearch {
         AABB boundingBox = new AABB(blockPos);
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
-        VertexConsumer vertexConsumer = consumers.getBuffer(NO_DEPTH_LAYER.apply(null));
+        VertexConsumer vertexConsumer = consumers.getBuffer(NO_DEPTH_LAYER.apply(Unit.INSTANCE));
 
         int rgb = Mth.hsvToRgb((float) (elapsedTime / 2000000000.0), 0.7f, 0.6f);
         float alpha = 1;
@@ -114,7 +115,7 @@ public class SSSearch {
         LevelRenderer.renderLineBox(matrices, vertexConsumer, boundingBox, red, green, blue, alpha);
     }
 
-    private static final Function<Void, RenderType> NO_DEPTH_LAYER = Util.memoize($ -> {
+    private static final Function<Unit, RenderType> NO_DEPTH_LAYER = Util.memoize($ -> {
         RenderType.CompositeState multiPhaseParameters = RenderType.CompositeState.builder()
                 .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
                 .setTransparencyState(new RenderType.TransparencyStateShard("translucent_transparency", () -> {

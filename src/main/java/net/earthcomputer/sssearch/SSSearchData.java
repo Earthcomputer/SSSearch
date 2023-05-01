@@ -7,7 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -136,7 +137,7 @@ public class SSSearchData {
                 entryJson.addProperty("x", pos.getX());
                 entryJson.addProperty("y", pos.getY());
                 entryJson.addProperty("z", pos.getZ());
-                entryJson.addProperty("item", Registry.ITEM.getKey(entry.getValue()).toString());
+                entryJson.addProperty("item", BuiltInRegistries.ITEM.getKey(entry.getValue()).toString());
                 valuesInDimension.add(entryJson);
             }
             result.add(dimensionAndEntry.getKey().location().toString(), valuesInDimension);
@@ -147,7 +148,7 @@ public class SSSearchData {
     private static SSSearchData fromJson(String saveName, JsonObject json) {
         SSSearchData result = new SSSearchData(saveName);
         for (var dimensionAndEntry : json.entrySet()) {
-            ResourceKey<Level> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimensionAndEntry.getKey()));
+            ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionAndEntry.getKey()));
             for (JsonElement entry : GsonHelper.convertToJsonArray(dimensionAndEntry.getValue(), dimensionAndEntry.getKey())) {
                 JsonObject entryJson = GsonHelper.convertToJsonObject(entry, "entry of " + dimensionAndEntry.getKey());
                 int x = GsonHelper.getAsInt(entryJson, "x");

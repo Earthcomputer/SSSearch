@@ -2,6 +2,7 @@
   "sssearch.add.success": "Added item %s to Storage System Memory",
   "sssearch.clear": "Clear Memory",
   "sssearch.clear.success": "Cleared Storage System Memory",
+  "sssearch.emptyContainer": "This container is empty",
   "sssearch.multipleItemTypes": "This container has multiple item types",
   "sssearch.name": "Storage Search",
   "sssearch.render.noPositions": "No Storage System locations found for %s",
