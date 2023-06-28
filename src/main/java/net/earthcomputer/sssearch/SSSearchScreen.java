@@ -182,7 +182,7 @@ public class SSSearchScreen extends EffectRenderingInventoryScreen<SSSearchScree
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int i, int j) {
         RenderSystem.disableBlend();
-        guiGraphics.drawString(font, Component.translatable("sssearch.name"), 8, 6, 0x404040);
+        guiGraphics.drawString(font, Component.translatable("sssearch.name"), 8, 6, 0x404040, false);
     }
 
     @Override
