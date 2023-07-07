@@ -1,0 +1,10 @@
+{
+    "sssearch.add.success": "已將 %s 記錄至緩存",
+    "sssearch.clear": "清除記錄",
+    "sssearch.clear.success": "已清除儲存記錄",
+    "sssearch.multipleItemTypes": "這個容器有多種物品類型",
+    "sssearch.name": "儲存記錄蒐索",
+    "sssearch.render.noPositions": "未找到 %s 的儲存位置",
+    "sssearch.render.success": "已渲染 %s 的儲存位置",
+    "sssearch.setupMode": "記錄模式: %s"
+}
